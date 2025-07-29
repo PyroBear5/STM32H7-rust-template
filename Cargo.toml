@@ -12,6 +12,20 @@ version = "0.1.0"
 name = "integration"
 harness = false
 
+
+[[test]]
+name = "rx-tx-test"
+harness = false
+
+# The following two settings a requiered, so you can simply use cargo test to run all tests
+[lib]
+test = false
+
+[[bin]]
+name = "{{crate_name}}"
+path = "src/main.rs"
+test = false
+
 [dependencies]
 cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7"
