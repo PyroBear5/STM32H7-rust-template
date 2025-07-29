@@ -1,10 +1,10 @@
 #![no_std]
 #![no_main]
 
+use defmt_rtt as _;
+use panic_probe as _;
 use stm32h7_template as _; // memory layout + panic handler
-
-// See https://crates.io/crates/defmt-test/0.3.0 for more documentation (e.g. about the 'state'
-// feature)
+use stm32h7xx_hal as _;
 #[defmt_test::tests]
 mod tests {
     use defmt::assert;
