@@ -1,227 +1,185 @@
-# `app-template`
 
-> Quickly set up a [`probe-rs`] + [`defmt`] + [`flip-link`] embedded project
+# STM32H7 Rust Project Setup Guide
 
-[`probe-rs`]: https://crates.io/crates/probe-rs
-[`defmt`]: https://github.com/knurling-rs/defmt
-[`flip-link`]: https://github.com/knurling-rs/flip-link
+This guide explains how to quickly set up a Rust project for the **STM32H7** series using a template based on the [knurling-rs app-template](https://github.com/knurling-rs/app-template).
 
-## Dependencies
+---
 
-### 1. `flip-link`:
+## Step 1: Set up tools
 
-```bash
-cargo install flip-link
-```
+1. **Install flip-link**
 
-### 2. `probe-rs`:
+   ```bash
+   cargo install flip-link
+   ```
 
-Install probe-rs by following the instructions at <https://probe.rs/docs/getting-started/installation/>.
+2. **Install probe-rs**
+   Follow the installation instructions here:
+   [https://probe.rs/docs/getting-started/installation/](https://probe.rs/docs/getting-started/installation/)
 
-### 3. [`cargo-generate`]:
+3. **Install cargo-generate**
 
-```bash
-cargo install cargo-generate
-```
+   ```bash
+   cargo install cargo-generate
+   ```
 
-[`cargo-generate`]: https://crates.io/crates/cargo-generate
+---
 
-> *Note:* You can also just clone this repository instead of using `cargo-generate`, but this involves additional manual adjustments.
+## Step 2: Setup Project
 
-## Setup
-
-### 1. Initialize the project template
+### On Linux / macOS:
 
 ```bash
 cargo generate \
-    --git https://github.com/knurling-rs/app-template \
+    --git https://github.com/PyroBear5/STM32H7-rust-template \
     --branch main \
-    --name my-app
+    --name my-STM32H7-project
 ```
 
-If you look into your new `my-app` folder, you'll find that there are a few `TODO`s in the files marking the properties you need to set.
+### On Windows (Command Prompt):
 
-Let's walk through them together now.
-
-### 2. Set `probe-rs` chip
-
-Pick a chip from ` probe-rs chip list` and enter it into `.cargo/config.toml`.
-
-If, for example, you have a nRF52840 Development Kit from one of [our workshops], replace `{{chip}}` with `nRF52840_xxAA`.
-
-[our workshops]: https://github.com/ferrous-systems/embedded-trainings-2020
-
-```diff
- # .cargo/config.toml
- [target.'cfg(all(target_arch = "arm", target_os = "none"))']
--runner = "probe-rs run --chip {{chip}}"
-+runner = "probe-rs run --chip nRF52840_xxAA"
+```cmd
+cargo generate ^
+    --git https://github.com/PyroBear5/STM32H7-rust-template ^
+    --branch main ^
+    --name my-STM32H7-project
 ```
 
-### 2.1 Pass custom log format
+### On Windows (PowerShell):
 
-You need to use an array of strings instead of a single string for the `runner` if you use a custom log format.
-
-```toml
-runner = ["probe-rs", "run", "--chip", "$CHIP", "--log-format", "{L} {s}"]
+```powershell
+cargo generate `
+    --git https://github.com/PyroBear5/STM32H7-rust-template `
+    --branch main `
+    --name my-STM32H7-project
 ```
 
-### 3. Adjust the compilation target
+> **Note:** Replace `my-STM32H7-project` with your project name.
 
-In `.cargo/config.toml`, pick the right compilation target for your board.
+---
 
-```diff
- # .cargo/config.toml
- [build]
--target = "thumbv6m-none-eabi"    # Cortex-M0 and Cortex-M0+
--# target = "thumbv7m-none-eabi"    # Cortex-M3
--# target = "thumbv7em-none-eabi"   # Cortex-M4 and Cortex-M7 (no FPU)
--# target = "thumbv7em-none-eabihf" # Cortex-M4F and Cortex-M7F (with FPU)
-+target = "thumbv7em-none-eabihf" # Cortex-M4F (with FPU)
-```
+## Step 3: Run the Project
 
-Add the target with `rustup`.
+To build and flash the code:
 
 ```bash
-rustup target add thumbv7em-none-eabihf
+cargo run
 ```
 
-### 4. Add a HAL as a dependency
+Example output:
 
-In `Cargo.toml`, list the Hardware Abstraction Layer (HAL) for your board as a dependency.
-
-For the nRF52840 you'll want to use the [`nrf52840-hal`].
-
-[`nrf52840-hal`]: https://crates.io/crates/nrf52840-hal
-
-```diff
- # Cargo.toml
- [dependencies]
--# some-hal = "1.2.3"
-+nrf52840-hal = "0.14.0"
+```
+PS {path_to_your_project}\my-STM32H7-project> cargo run --bin hello
+    Finished `dev` profile [optimized + debuginfo] target(s) in 0.10s
+     Running `probe-rs run --chip STM32H753ZI target\thumbv7em-none-eabihf\debug\hello`
+      Erasing ✔ 100% [####################] 128.00 KiB @  70.93 KiB/s (took 2s)
+  Programming ✔ 100% [####################]   8.00 KiB @  45.68 KiB/s (took 0s)
+     Finished in 1.98s
+Hello, world!
+Firmware exited successfully
 ```
 
-⚠️ Note for RP2040 users ⚠️
+If multiple devices are connected, you can select one:
 
-You will need to not just specify the `rp-hal` HAL, but a BSP (board support crate) which includes a second stage bootloader. Please find a list of available BSPs [here](https://github.com/rp-rs/rp-hal-boards#packages).
-
-### 5. Import your HAL
-
-Now that you have selected a HAL, fix the HAL import in `src/lib.rs`
-
-```diff
- // my-app/src/lib.rs
--// use some_hal as _; // memory layout
-+use nrf52840_hal as _; // memory layout
+```
+Available Probes:
+0: STLink V3 -- 0483:374e:004800303234510133353533 (ST-LINK)
+1: STLink V3 -- 0483:374e:002C00333234510233353533 (ST-LINK)
+Selection:
 ```
 
-### (6. Get a linker script)
+---
 
-Some HAL crates require that you manually copy over a file called `memory.x` from the HAL to the root of your project. For nrf52840-hal, this is done automatically so no action is needed. For other HAL crates, you can get it from your local Cargo folder, the default location is under:
+## Step 4: Testing
 
-```text
-~/.cargo/registry/src/
+Integration tests are located in the `tests` directory (e.g., `tests/integration.rs`).
+
+Run them with:
+
+```bash
+cargo test --test integration
 ```
 
-Not all HALs provide a `memory.x` file, you may need to write it yourself. Check the documentation for the HAL you are using.
+> **Note:** If you add a new test file to `tests/`, you also need to add a new `[[test]]` section to `Cargo.toml`.
 
-### 7. Run!
+---
 
-You are now all set to `cargo-run` your first `defmt`-powered application!
-There are some examples in the `src/bin` directory.
+## Optional: Individualize Your Project
 
-Start by `cargo run`-ning `my-app/src/bin/hello.rs`:
+### Change the Chip
 
-```console
-$ # `rb` is an alias for `run --bin`
-$ cargo rb hello
-    Finished dev [optimized + debuginfo] target(s) in 0.03s
-flashing program ..
-DONE
-resetting device
-0.000000 INFO Hello, world!
-(..)
+In `.cargo/config.toml`:
 
-$ echo $?
-0
+```toml
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-rs run --chip STM32H753ZI"  # Change to your chip if needed
 ```
 
-If you're running out of memory (`flip-link` bails with an overflow error), you can decrease the size of the device memory buffer by setting the `DEFMT_RTT_BUFFER_SIZE` environment variable. The default value is 1024 bytes, and powers of two should be used for optimal performance:
+### Custom Log Format
 
-```console
-$ DEFMT_RTT_BUFFER_SIZE=64 cargo rb hello
+You can customize the log format:
+
+```toml
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = ["probe-rs", "run", "--chip", "STM32H753ZI", "--log-format", "{L} {s}"]
 ```
 
-### (8. Set `rust-analyzer.linkedProjects`)
+### Adjust Compilation Target
 
-If you are using [rust-analyzer] with VS Code for IDE-like features you can add following configuration to your `.vscode/settings.json` to make it work transparently across workspaces. Find the details of this option in the [RA docs].
+In `.cargo/config.toml`:
 
-```json
-{
-    "rust-analyzer.linkedProjects": [
-        "Cargo.toml",
-        "firmware/Cargo.toml",
-    ]
-}
+```toml
+[build]
+# target = "thumbv6m-none-eabi"    # Cortex-M0/M0+
+# target = "thumbv7m-none-eabi"    # Cortex-M3
+# target = "thumbv7em-none-eabi"   # Cortex-M4/M7 (no FPU)
+target = "thumbv7em-none-eabihf"   # Cortex-M4F/M7F (with FPU)
 ```
 
-[RA docs]: https://rust-analyzer.github.io/manual.html#configuration
-[rust-analyzer]: https://rust-analyzer.github.io/
+---
 
-## Running tests
+## Dependencies
 
-The template comes configured for running unit tests and integration tests on the target.
+In `Cargo.toml`, adjust dependencies as needed:
 
-Unit tests reside in the library crate and can test private API; the initial set of unit tests are in `src/lib.rs`.
-`cargo test --lib` will run those unit tests.
+```toml
+[dependencies]
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+defmt = "1.0.1"
+defmt-rtt = "1.0.0"
+panic-probe = { version = "1.0.0", features = ["print-defmt"] }
+cortex-m-semihosting = "0.5.0"
+stm32h7xx-hal = { version = "0.16.0", features = ["stm32h753v", "rt", "defmt"] }
+embedded-hal = "1.0.0"
 
-```console
-$ cargo test --lib
-(1/1) running `it_works`...
-└─ app::unit_tests::__defmt_test_entry @ src/lib.rs:33
-all tests passed!
-└─ app::unit_tests::__defmt_test_entry @ src/lib.rs:28
+# Older embedded-hal required by stm32h7xx HAL
+embedded-hal-02 = { package = "embedded-hal", version = "0.2.6", features = ["unproven"] }
 ```
 
-Integration tests reside in the `tests` directory; the initial set of integration tests are in `tests/integration.rs`.
-`cargo test --test integration` will run those integration tests.
-Note that the argument of the `--test` flag must match the name of the test file in the `tests` directory.
+---
 
-```console
-$ cargo test --test integration
-(1/1) running `it_works`...
-└─ integration::tests::__defmt_test_entry @ tests/integration.rs:13
-all tests passed!
-└─ integration::tests::__defmt_test_entry @ tests/integration.rs:8
+## Imports
+
+If you modify dependencies, also update `src/lib.rs`:
+
+```rust
+use stm32h7xx_hal as _; // Change if needed
+
+// If using nb:
+// use nb;
 ```
 
-Note that to add a new test file to the `tests` directory you also need to add a new `[[test]]` section to `Cargo.toml`.
+---
 
-## Support
+## Linker Script
 
-`app-template` is part of the [Knurling] project, [Ferrous Systems]' effort at
-improving tooling used to develop for embedded systems.
+If your HAL crate requires a `memory.x` file, ensure it’s in your project root.
+The `stm32h7xx-hal` crate already provides one:
+[https://github.com/stm32-rs/stm32h7xx-hal/blob/master/memory.x](https://github.com/stm32-rs/stm32h7xx-hal/blob/master/memory.x)
 
-If you think that our work is useful, consider sponsoring it via [GitHub
-Sponsors].
+---
 
-## License
+You’re now ready to develop with Rust on STM32H7!
 
-Licensed under either of
-
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
-  http://www.apache.org/licenses/LICENSE-2.0)
-
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
-
-### Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
-licensed as above, without any additional terms or conditions.
-
-[Knurling]: https://knurling.ferrous-systems.com
-[Ferrous Systems]: https://ferrous-systems.com/
-[GitHub Sponsors]: https://github.com/sponsors/knurling-rs
+---
