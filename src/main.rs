@@ -1,6 +1,5 @@
 #![no_main]
 #![no_std]
-#![no_main]
 
 use {{crate_name}}::*;
 use defmt_rtt as _;
