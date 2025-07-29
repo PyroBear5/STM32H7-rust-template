@@ -58,6 +58,18 @@ cargo generate `
 
 ---
 
+### Optional
+You can also use:
+```cmd
+cargo generate --git https://github.com/PyroBear5/STM32H7-rust-template
+```
+then it will ask you the name of the project:
+```cmd
+PS {path_to_your_project}> cargo generate --git https://github.com/PyroBear5/STM32H7-rust-template
+ Project Name:
+```
+Simply type in the name of your project and press enter to generate the project.
+
 ## Step 3: Run the Project
 
 To build and flash the code:
@@ -97,10 +109,15 @@ Integration tests are located in the `tests` directory (e.g., `tests/integration
 Run them with:
 
 ```bash
-cargo test --test integration
+cargo test
 ```
-
+This will run all tests
 > **Note:** If you add a new test file to `tests/`, you also need to add a new `[[test]]` section to `Cargo.toml`.
+
+If you just want to run one test use:
+```bash
+cargo test --test {name_of_desired_test}
+```
 
 ---
 
