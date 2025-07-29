@@ -1,6 +1,6 @@
 [package]
-authors = ["moritz <moritzebner1@gmail.com>"]
-name = "stm32h7-template"
+authors = ["{{authors}}"]
+name = "{{project-name}}"
 edition = "2021"
 version = "0.1.0"
 
