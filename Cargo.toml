@@ -1,4 +1,6 @@
 [package]
+// TODO: If you did not use cargo generate -> insert your name (authors) and the project-name
+
 authors = ["{{authors}}"]
 name = "{{project-name}}"
 edition = "2021"

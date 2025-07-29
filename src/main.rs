@@ -1,6 +1,7 @@
 #![no_main]
 #![no_std]
 
+// TODO: If you did not use cargo generate -> insert your crate_name
 use {{crate_name}}::*;
 use defmt_rtt as _;
 use panic_probe as _;
