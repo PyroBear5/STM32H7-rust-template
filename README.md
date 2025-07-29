@@ -107,6 +107,7 @@ Selection:
 Integration tests are located in the `tests` directory (e.g., `tests/integration.rs`).
 
 Run them with:
+If you want to run all tests, you have to connect PD8 and PD9 on your bord, or else the test "rx-tx-test" will fail.
 
 ```bash
 cargo test
@@ -118,7 +119,7 @@ If you just want to run one test use:
 ```bash
 cargo test --test {name_of_desired_test}
 ```
-
+> **Note:** "integration will run, no matter if you connected anything on your bord.
 ---
 
 ## Optional: Individualize Your Project
