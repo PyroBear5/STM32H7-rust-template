@@ -44,6 +44,8 @@ embedded-hal-02 = { package = "embedded-hal", version = "0.2.6", features = [
 
 [dev-dependencies]
 defmt-test = "0.4.0"
+nb = "1.1.0"
+
 
 # cargo build/run
 [profile.dev]
